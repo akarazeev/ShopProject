@@ -1,0 +1,17 @@
+<html>
+    <head>
+        <title>{{ title }}</title>
+    </head>
+    <body>
+        {% if user.username == "admin" %}
+            <h1>Привет, админ!</h1>
+        {% else %}
+            <h1>Привет, {{ user.username }}!</h1>
+        {% endif %}
+
+        <p>Доступные действия:</p>
+        {% for action in actions %}
+            <div><a href={{ url_for(action.title) }}>{{ action.text }}</a></div>
+        {% endfor %}
+    </body>
+</html>

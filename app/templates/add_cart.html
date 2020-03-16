@@ -1,0 +1,12 @@
+<html>
+    <head>
+        <title>{{ title }}</title>
+    </head>
+    <body>
+        {% if user.username == "admin" %}
+            <h1>Привет, админ!</h1>
+        {% else %}
+            <h1>Привет, {{ user.username }}! Здесь можно добавить товар в корзину</h1>
+        {% endif %}
+    </body>
+</html>
