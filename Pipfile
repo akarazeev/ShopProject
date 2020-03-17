@@ -9,6 +9,7 @@ verify_ssl = true
 flask = "*"
 python-dotenv = "*"
 ipykernel = "*"
+flask-login = "*"
 
 [requires]
 python_version = "3.8"
