@@ -10,6 +10,7 @@ flask = "*"
 python-dotenv = "*"
 ipykernel = "*"
 flask-login = "*"
+flask-restful = "*"
 
 [requires]
 python_version = "3.8"

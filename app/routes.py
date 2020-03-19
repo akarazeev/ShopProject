@@ -6,6 +6,7 @@ user = {'username': 'test'}
 # user = {'username': 'admin'}
 
 db_items = list()
+db_cart = list()
 
 # is_admin = False
 is_admin = user['username'] == 'admin'
@@ -112,4 +113,53 @@ def api_all_items():
     """
 
     res = jsonify({'items': db_items})
+    return res
+
+
+@app.route('/api/get_item/<int:item_id>', methods=['GET'])
+def api_get_item(item_id):
+    """
+    Returns information related to item with id `item_id`.
+    :param item_id:
+    :return:
+    """
+    idxs = [idx for (idx, item) in enumerate(db_items) if item['id'] == item_id]
+    if len(idxs) != 1:
+        abort(404)
+    item_idx = idxs[0]
+
+    res = jsonify(db_items[item_idx])
+
+    return res
+
+
+@app.route('/api/add_cart', methods=['POST'])
+def api_add_cart():
+    """
+    Add item to cart.
+    :return:
+    """
+    req_json = request.json
+    if not req_json or not 'user_id' in req_json or not 'item_id' in req_json:
+        abort(400)
+
+    # TODO: Make a record in db...
+
+    record = {
+        'user_id': req_json['user_id'],
+        'item_id': req_json['item_id']
+    }
+    db_cart.append(record)
+
+    return jsonify({'record': record}), 201
+
+
+@app.route('/api/cart/<int:user_id>', methods=['GET'])
+def api_cart(user_id):
+    """
+    List all items in the cart of user with id `user_id`.
+    :return:
+    """
+
+    res = jsonify({'cart': db_cart})
     return res
