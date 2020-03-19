@@ -1,1 +1,2 @@
 FLASK_APP=shop.py
+FLASK_DEBUG=1

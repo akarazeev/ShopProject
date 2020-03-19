@@ -10,6 +10,8 @@ flask = "*"
 python-dotenv = "*"
 ipykernel = "*"
 flask-login = "*"
+flask-sqlalchemy = "*"
+flask-migrate = "*"
 
 [requires]
 python_version = "3.8"

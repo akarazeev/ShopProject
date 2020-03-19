@@ -1,6 +1,7 @@
 from flask import render_template, abort, jsonify, g, request
 from flask_login import current_user, login_user, logout_user, login_required
-from app import app
+from app.models import User
+from app import app, db
 
 user = {'username': 'test'}
 # user = {'username': 'admin'}
@@ -113,3 +114,25 @@ def api_all_items():
 
     res = jsonify({'items': db_items})
     return res
+
+
+def is_exist(username):
+    cur_user = User.query.filter_by(username=username).first()
+    if cur_user is None:
+        return False
+    return True
+
+
+# username, password, birth_date, register_date, email, phone_number
+@app.route('/api/register', methods=['POST'])
+def api_register():
+    data = request.json
+    username = data['username']
+    if is_exist(username):
+        return jsonify({'error': 'user already exist'}), 400
+    cur_user = User(username=data['username'], birth_date=data['birth_date'], register_date=data['register_date'],
+                    email=data['email'], phone_number=data['phone_number'])
+    cur_user.set_password(data['password'])
+    db.session.add(cur_user)
+    db.session.commit()
+    return jsonify({'message': 'user added successfully'}), 200
