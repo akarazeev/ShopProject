@@ -1,8 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "26b7bd19d06bfe73794ce5d0c97e2e047e3212ea430d7a20ab13ddd6a5c3b0e0"
-            "sha256": "fb3c9d39fea750ecd9734974753109b3ffddfbb3847276c69f6719da67e94212"
+            "sha256": "15f314009fa4238666bfcafcec66fae9264d19aa769b43bb02e670a389a97a96"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -18,20 +17,17 @@
     },
     "default": {
         "alembic": {
+            "hashes": [
+                "sha256:791a5686953c4b366d3228c5377196db2f534475bb38d26f70eb69668efd9028"
+            ],
+            "version": "==1.4.1"
+        },
         "aniso8601": {
             "hashes": [
                 "sha256:529dcb1f5f26ee0df6c0a1ee84b7b27197c3c50fc3a6321d66c544689237d072",
                 "sha256:c033f63d028b9a58e3ab0c2c7d0532ab4bfa7452bfc788fbfe3ddabd327b181a"
             ],
             "version": "==8.0.0"
-        },
-        "appnope": {
-            "hashes": [
-                "sha256:791a5686953c4b366d3228c5377196db2f534475bb38d26f70eb69668efd9028"
-            ],
-            "version": "==1.4.1"
-            "markers": "platform_system == 'Darwin'",
-            "version": "==0.1.0"
         },
         "backcall": {
             "hashes": [
@@ -78,14 +74,6 @@
             "index": "pypi",
             "version": "==2.5.3"
         },
-        "flask-sqlalchemy": {
-            "hashes": [
-                "sha256:0078d8663330dc05a74bc72b3b6ddc441b9a744e2f56fe60af1a5bfc81334327",
-                "sha256:6974785d913666587949f7c2946f7001e4fa2cb2d19f4e69ead02e4b8f50b33d"
-            ],
-            "index": "pypi",
-            "version": "==2.4.1"
-        },
         "flask-restful": {
             "hashes": [
                 "sha256:5ea9a5991abf2cb69b4aac19793faac6c032300505b325687d7c305ffaa76915",
@@ -93,6 +81,14 @@
             ],
             "index": "pypi",
             "version": "==0.3.8"
+        },
+        "flask-sqlalchemy": {
+            "hashes": [
+                "sha256:0078d8663330dc05a74bc72b3b6ddc441b9a744e2f56fe60af1a5bfc81334327",
+                "sha256:6974785d913666587949f7c2946f7001e4fa2cb2d19f4e69ead02e4b8f50b33d"
+            ],
+            "index": "pypi",
+            "version": "==2.4.1"
         },
         "ipykernel": {
             "hashes": [
