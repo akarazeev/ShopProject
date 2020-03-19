@@ -12,6 +12,7 @@ ipykernel = "*"
 flask-login = "*"
 flask-sqlalchemy = "*"
 flask-migrate = "*"
+flask-restful = "*"
 
 [requires]
 python_version = "3.8"
