@@ -124,15 +124,23 @@ def is_exist(username):
     return True
 
 
-# username, password, birth_date, register_date, email, phone_number
 @app.route('/api/register', methods=['POST'])
 def api_register():
+    """
+    `username, password, birth_date, register_date, email, phone_number`
+    :return:
+    """
     data = request.json
     username = data['username']
     if is_exist(username):
         return jsonify({'error': 'user already exist'}), 400
-    cur_user = User(username=data['username'], birth_date=data['birth_date'], register_date=data['register_date'],
-                    email=data['email'], phone_number=data['phone_number'])
+    cur_user = User(
+        username=data['username'],
+        birth_date=data['birth_date'],
+        register_date=data['register_date'],
+        email=data['email'],
+        phone_number=data['phone_number']
+    )
     cur_user.set_password(data['password'])
     db.session.add(cur_user)
     db.session.commit()
