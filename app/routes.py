@@ -77,7 +77,7 @@ def api_new_item():
     }
     db_items.append(item)
 
-    return jsonify({'task': item}), 201
+    return jsonify(task=item), 201
 
 
 @app.route('/api/v1/update_item/<int:item_id>', methods=['PUT'])
@@ -103,7 +103,7 @@ def api_update_item(item_id):
     db_items[item_idx]['title'] = req_json.get('title', db_items[item_idx]['title'])
     db_items[item_idx]['description'] = req_json.get('description', db_items[item_idx]['description'])
 
-    return jsonify({'task': db_items[item_idx]})
+    return jsonify(task=db_items[item_idx])
 
 
 @app.route('/api/v1/all_items', methods=['GET'])
@@ -113,7 +113,7 @@ def api_all_items():
     :return:
     """
 
-    res = jsonify({'items': db_items})
+    res = jsonify(items=db_items)
     return res
 
 
@@ -144,7 +144,7 @@ def api_register():
     cur_user.set_password(data['password'])
     db.session.add(cur_user)
     db.session.commit()
-    return jsonify({'message': 'user added successfully'}), 200
+    return jsonify(message='user added successfully'), 200
 
 
 @app.route('/api/v1/get_item/<int:item_id>', methods=['GET'])
@@ -182,7 +182,7 @@ def api_add_cart():
     }
     db_cart.append(record)
 
-    return jsonify({'record': record}), 201
+    return jsonify(record=record), 201
 
 
 @app.route('/api/v1/cart/<int:user_id>', methods=['GET'])
@@ -192,5 +192,5 @@ def api_cart(user_id):
     :return:
     """
 
-    res = jsonify({'cart': db_cart})
+    res = jsonify(cart=db_cart)
     return res
