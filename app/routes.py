@@ -57,7 +57,7 @@ def view_cart():
 
 # API.
 
-@app.route('/api/new_item', methods=['POST'])
+@app.route('/api/v1/new_item', methods=['POST'])
 def api_new_item():
     """
     Create new item in the store.
@@ -80,7 +80,7 @@ def api_new_item():
     return jsonify({'task': item}), 201
 
 
-@app.route('/api/update_item/<int:item_id>', methods=['PUT'])
+@app.route('/api/v1/update_item/<int:item_id>', methods=['PUT'])
 def api_update_item(item_id):
     """
     Update parameters of the stored item.
@@ -106,7 +106,7 @@ def api_update_item(item_id):
     return jsonify({'task': db_items[item_idx]})
 
 
-@app.route('/api/all_items', methods=['GET'])
+@app.route('/api/v1/all_items', methods=['GET'])
 def api_all_items():
     """
     List all items in the store.
@@ -124,7 +124,7 @@ def is_exist(username):
     return True
 
 
-@app.route('/api/register', methods=['POST'])
+@app.route('/api/v1/register', methods=['POST'])
 def api_register():
     """
     `username, password, birth_date, register_date, email, phone_number`
@@ -147,7 +147,7 @@ def api_register():
     return jsonify({'message': 'user added successfully'}), 200
 
 
-@app.route('/api/get_item/<int:item_id>', methods=['GET'])
+@app.route('/api/v1/get_item/<int:item_id>', methods=['GET'])
 def api_get_item(item_id):
     """
     Returns information related to item with id `item_id`.
@@ -164,7 +164,7 @@ def api_get_item(item_id):
     return res
 
 
-@app.route('/api/add_cart', methods=['POST'])
+@app.route('/api/v1/add_cart', methods=['POST'])
 def api_add_cart():
     """
     Add item to cart.
@@ -185,7 +185,7 @@ def api_add_cart():
     return jsonify({'record': record}), 201
 
 
-@app.route('/api/cart/<int:user_id>', methods=['GET'])
+@app.route('/api/v1/cart/<int:user_id>', methods=['GET'])
 def api_cart(user_id):
     """
     List all items in the cart of user with id `user_id`.
