@@ -76,11 +76,9 @@ def api_new_item():
     if ('category' not in req_json) or type(req_json['category']) != str:
         abort(400)
 
-    # TODO: Store new item in db...
-
     item = Item(title=req_json['title'],
                 description=req_json.get('description', ""),
-                data_added=today(),
+                date_added=today(),
                 category=req_json['category'])
 
     db.session.add(item)
@@ -108,10 +106,9 @@ def api_update_item(item_id):
     :param item_id:
     :return:
     """
-    idxs = [idx for (idx, item) in enumerate(db_items) if item['id'] == item_id]
-    if len(idxs) != 1:
-        abort(404)
-    item_idx = idxs[0]
+    item = Item.query.filter_by(id=item_id).first()
+    if item is None:
+        abort(400)
 
     req_json = request.json
     if not req_json:
@@ -121,10 +118,13 @@ def api_update_item(item_id):
     if 'description' in req_json and type(req_json['description']) != str:
         abort(400)
 
-    db_items[item_idx]['title'] = req_json.get('title', db_items[item_idx]['title'])
-    db_items[item_idx]['description'] = req_json.get('description', db_items[item_idx]['description'])
+    item.title = req_json.get('title', item.title)
+    item.description = req_json.get('description', item.description)
 
-    return jsonify(task=db_items[item_idx])
+    db.session.add(item)
+    db.session.commit()
+
+    return jsonify(task=get_item_json(item))
 
 
 @app.route('/api/v1/all_items', methods=['GET'])
@@ -182,14 +182,10 @@ def api_get_item(item_id):
     :param item_id:
     :return:
     """
-    idxs = [idx for (idx, item) in enumerate(db_items) if item['id'] == item_id]
-    if len(idxs) != 1:
-        abort(404)
-    item_idx = idxs[0]
-
-    res = jsonify(db_items[item_idx])
-
-    return res
+    item = Item.query.filter_by(id=item_id).first()
+    if item is None:
+        abort(400)
+    return jsonify(get_item_json(item))
 
 
 @app.route('/api/v1/add_cart', methods=['POST'])
