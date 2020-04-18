@@ -1,6 +1,8 @@
+import datetime
+
 from flask import render_template, abort, jsonify, g, request
 from flask_login import current_user, login_user, logout_user, login_required
-from app.models import User
+from app.models import User, Item, Association
 from app import app, db
 
 user = {'username': 'test'}
@@ -11,6 +13,7 @@ db_cart = list()
 
 # is_admin = False
 is_admin = user['username'] == 'admin'
+
 
 @app.route('/')
 @app.route('/index')
@@ -64,20 +67,38 @@ def api_new_item():
     :return:
     """
     req_json = request.json
-    if not req_json or not 'title' in req_json:
+
+    if not req_json:
+        abort(400)
+
+    if ('title' not in req_json) or type(req_json['title']) != str:
+        abort(400)
+    if ('category' not in req_json) or type(req_json['category']) != str:
         abort(400)
 
     # TODO: Store new item in db...
 
-    item = {
-        'id': len(db_items),
-        'title': req_json['title'],
-        'description': req_json.get('description', ""),
-        'date_added': "today"
-    }
-    db_items.append(item)
+    item = Item(title=req_json['title'],
+                description=req_json.get('description', ""),
+                data_added=today(),
+                category=req_json['category'])
 
-    return jsonify(task=item), 201
+    db.session.add(item)
+    db.session.commit()
+
+    return jsonify(task=get_item_json(item)), 201
+
+
+def today():
+    return str(datetime.datetime.now().date())
+
+
+def get_item_json(item):
+    return {'id': item.id,
+            'title': item.title,
+            'description': item.description,
+            'date_added': item.date_added,
+            'category': item.category}
 
 
 @app.route('/api/v1/update_item/<int:item_id>', methods=['PUT'])
@@ -112,8 +133,8 @@ def api_all_items():
     List all items in the store.
     :return:
     """
-
-    res = jsonify(items=db_items)
+    items = [get_item_json(item) for item in Item.query.all()]
+    res = jsonify(items=items)
     return res
 
 
@@ -178,18 +199,48 @@ def api_add_cart():
     :return:
     """
     req_json = request.json
-    if not req_json or not 'user_id' in req_json or not 'item_id' in req_json:
+    if not req_json:
         abort(400)
 
-    # TODO: Make a record in db...
+    for p in ['user_id', 'item_id', 'amount']:
+        if p not in req_json:
+            abort(400)
+
+    item = Item.query.filter_by(id=req_json['item_id']).first()
+    if item is None:
+        abort(400)
+
+    user = User.query.filter_by(id=req_json['user_id']).first()
+    if user is None:
+        abort(400)
+
+    idx = get_index_of_item(user, item.id)
+    amount = int(req_json['amount'])
+    print(idx)
+    if idx == -1:
+        a = Association(amount=amount)
+        a.item = item
+        user.cart.append(a)
+    else:
+        user.cart[idx].amount += amount
+
+    db.session.add(user)
+    db.session.commit()
 
     record = {
         'user_id': req_json['user_id'],
-        'item_id': req_json['item_id']
+        'item_id': req_json['item_id'],
+        'amount': req_json['amount']
     }
-    db_cart.append(record)
-
     return jsonify(record=record), 201
+
+
+def get_index_of_item(user, item_id):
+    cart = user.cart
+    for i in range(len(cart)):
+        if cart[i].item.id == item_id:
+            return i
+    return -1
 
 
 @app.route('/api/v1/cart/<int:user_id>', methods=['GET'])
@@ -198,6 +249,10 @@ def api_cart(user_id):
     List all items in the cart of user with id `user_id`.
     :return:
     """
+    user = User.query.filter_by(id=user_id).first()
+    if user is None:
+        abort(404)
+    cart = [{'item': get_item_json(item.item), 'amount': item.amount} for item in user.cart]
 
-    res = jsonify(cart=db_cart)
+    res = jsonify(cart=cart)
     return res
