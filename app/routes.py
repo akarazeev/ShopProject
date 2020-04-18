@@ -117,9 +117,10 @@ def api_all_items():
     return res
 
 
-def is_exist(username):
-    cur_user = User.query.filter_by(username=username).first()
-    if cur_user is None:
+def is_exist(username, email):
+    username_query = User.query.filter_by(username=username).first()
+    email_query = User.query.filter_by(email=email).first()
+    if username_query is None and email_query is None:
         return False
     return True
 
@@ -131,8 +132,14 @@ def api_register():
     :return:
     """
     data = request.json
-    username = data['username']
-    if is_exist(username):
+
+    if not data:
+        abort(400)
+    for p in ['username', 'password', 'register_date', 'email', 'phone_number', 'birth_date']:
+        if (p not in data) or type(data[p]) != str:
+            abort(400)
+
+    if is_exist(data['username'], data['email']):
         return jsonify({'error': 'user already exist'}), 400
     cur_user = User(
         username=data['username'],
