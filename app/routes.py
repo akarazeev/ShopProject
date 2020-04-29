@@ -1,6 +1,8 @@
+import datetime
+
 from flask import render_template, abort, jsonify, g, request
 from flask_login import current_user, login_user, logout_user, login_required
-from app.models import User
+from app.models import User, Item, Association
 from app import app, db
 
 user = {'username': 'test'}
@@ -11,6 +13,7 @@ db_cart = list()
 
 # is_admin = False
 is_admin = user['username'] == 'admin'
+
 
 @app.route('/')
 @app.route('/index')
@@ -64,20 +67,36 @@ def api_new_item():
     :return:
     """
     req_json = request.json
-    if not req_json or not 'title' in req_json:
+
+    if not req_json:
         abort(400)
 
-    # TODO: Store new item in db...
+    if ('title' not in req_json) or type(req_json['title']) != str:
+        abort(400)
+    if ('category' not in req_json) or type(req_json['category']) != str:
+        abort(400)
 
-    item = {
-        'id': len(db_items),
-        'title': req_json['title'],
-        'description': req_json.get('description', ""),
-        'date_added': "today"
-    }
-    db_items.append(item)
+    item = Item(title=req_json['title'],
+                description=req_json.get('description', ""),
+                date_added=today(),
+                category=req_json['category'])
 
-    return jsonify(task=item), 201
+    db.session.add(item)
+    db.session.commit()
+
+    return jsonify(task=get_item_json(item)), 201
+
+
+def today():
+    return str(datetime.datetime.now().date())
+
+
+def get_item_json(item):
+    return {'id': item.id,
+            'title': item.title,
+            'description': item.description,
+            'date_added': item.date_added,
+            'category': item.category}
 
 
 @app.route('/api/v1/update_item/<int:item_id>', methods=['PUT'])
@@ -87,10 +106,9 @@ def api_update_item(item_id):
     :param item_id:
     :return:
     """
-    idxs = [idx for (idx, item) in enumerate(db_items) if item['id'] == item_id]
-    if len(idxs) != 1:
-        abort(404)
-    item_idx = idxs[0]
+    item = Item.query.filter_by(id=item_id).first()
+    if item is None:
+        abort(400)
 
     req_json = request.json
     if not req_json:
@@ -100,10 +118,13 @@ def api_update_item(item_id):
     if 'description' in req_json and type(req_json['description']) != str:
         abort(400)
 
-    db_items[item_idx]['title'] = req_json.get('title', db_items[item_idx]['title'])
-    db_items[item_idx]['description'] = req_json.get('description', db_items[item_idx]['description'])
+    item.title = req_json.get('title', item.title)
+    item.description = req_json.get('description', item.description)
 
-    return jsonify(task=db_items[item_idx])
+    db.session.add(item)
+    db.session.commit()
+
+    return jsonify(task=get_item_json(item))
 
 
 @app.route('/api/v1/all_items', methods=['GET'])
@@ -112,14 +133,15 @@ def api_all_items():
     List all items in the store.
     :return:
     """
-
-    res = jsonify(items=db_items)
+    items = [get_item_json(item) for item in Item.query.all()]
+    res = jsonify(items=items)
     return res
 
 
-def is_exist(username):
-    cur_user = User.query.filter_by(username=username).first()
-    if cur_user is None:
+def is_exist(username, email):
+    username_query = User.query.filter_by(username=username).first()
+    email_query = User.query.filter_by(email=email).first()
+    if username_query is None and email_query is None:
         return False
     return True
 
@@ -131,8 +153,14 @@ def api_register():
     :return:
     """
     data = request.json
-    username = data['username']
-    if is_exist(username):
+
+    if not data:
+        abort(400)
+    for p in ['username', 'password', 'register_date', 'email', 'phone_number', 'birth_date']:
+        if (p not in data) or type(data[p]) != str:
+            abort(400)
+
+    if is_exist(data['username'], data['email']):
         return jsonify({'error': 'user already exist'}), 400
     cur_user = User(
         username=data['username'],
@@ -154,14 +182,10 @@ def api_get_item(item_id):
     :param item_id:
     :return:
     """
-    idxs = [idx for (idx, item) in enumerate(db_items) if item['id'] == item_id]
-    if len(idxs) != 1:
-        abort(404)
-    item_idx = idxs[0]
-
-    res = jsonify(db_items[item_idx])
-
-    return res
+    item = Item.query.filter_by(id=item_id).first()
+    if item is None:
+        abort(400)
+    return jsonify(get_item_json(item))
 
 
 @app.route('/api/v1/add_cart', methods=['POST'])
@@ -171,18 +195,48 @@ def api_add_cart():
     :return:
     """
     req_json = request.json
-    if not req_json or not 'user_id' in req_json or not 'item_id' in req_json:
+    if not req_json:
         abort(400)
 
-    # TODO: Make a record in db...
+    for p in ['user_id', 'item_id', 'amount']:
+        if p not in req_json:
+            abort(400)
+
+    item = Item.query.filter_by(id=req_json['item_id']).first()
+    if item is None:
+        abort(400)
+
+    user = User.query.filter_by(id=req_json['user_id']).first()
+    if user is None:
+        abort(400)
+
+    idx = get_index_of_item(user, item.id)
+    amount = int(req_json['amount'])
+    print(idx)
+    if idx == -1:
+        a = Association(amount=amount)
+        a.item = item
+        user.cart.append(a)
+    else:
+        user.cart[idx].amount += amount
+
+    db.session.add(user)
+    db.session.commit()
 
     record = {
         'user_id': req_json['user_id'],
-        'item_id': req_json['item_id']
+        'item_id': req_json['item_id'],
+        'amount': req_json['amount']
     }
-    db_cart.append(record)
-
     return jsonify(record=record), 201
+
+
+def get_index_of_item(user, item_id):
+    cart = user.cart
+    for i in range(len(cart)):
+        if cart[i].item.id == item_id:
+            return i
+    return -1
 
 
 @app.route('/api/v1/cart/<int:user_id>', methods=['GET'])
@@ -191,6 +245,10 @@ def api_cart(user_id):
     List all items in the cart of user with id `user_id`.
     :return:
     """
+    user = User.query.filter_by(id=user_id).first()
+    if user is None:
+        abort(404)
+    cart = [{'item': get_item_json(item.item), 'amount': item.amount} for item in user.cart]
 
-    res = jsonify(cart=db_cart)
+    res = jsonify(cart=cart)
     return res

@@ -6,6 +6,13 @@ from datetime import datetime, timedelta
 import os
 
 
+class Association(db.Model):
+    item_id = db.Column(db.Integer, db.ForeignKey('item.id'), primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), primary_key=True)
+    amount = db.Column(db.Integer)
+    item = db.relationship('Item')
+
+
 # {"username": "Nikita", "password: "test"}
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -13,11 +20,11 @@ class User(UserMixin, db.Model):
     email = db.Column(db.String(120), index=True, unique=True)
     birth_date = db.Column(db.String(15))
     register_date = db.Column(db.String(15))
-    cart = db.Column(db.Text)
     password_hash = db.Column(db.String(128))
     phone_number = db.Column(db.String(15))
     token = db.Column(db.String(32), index=True, unique=True)
     token_expiration = db.Column(db.DateTime)
+    cart = db.relationship('Association')
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -53,4 +60,6 @@ class Item(db.Model):
     category = db.Column(db.String(32), index=True)
     title = db.Column(db.String(32))
     description = db.Column(db.Text)
-    date_added = db.Column(db.DateTime)
+    date_added = db.Column(db.String(15))
+
+
