@@ -50,6 +50,7 @@ class User(UserMixin, db.Model):
 
 class Item(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    price = db.Column(db.Integer)
     category = db.Column(db.String(32), index=True)
     title = db.Column(db.String(32))
     description = db.Column(db.Text)
@@ -57,9 +58,25 @@ class Item(db.Model):
 
 
 class Association(db.Model):
-    item_id = db.Column(db.Integer, db.ForeignKey('item.id'), primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), primary_key=True)
+    item_id = db.Column(db.Integer, db.ForeignKey('item.id'), primary_key=True)
     amount = db.Column(db.Integer)
+
+    item = db.relationship('Item')
+
+
+class Order(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    checkout_date = db.Column(db.String(15))
+    finished = db.Column(db.Integer)  # True or False
+
+
+class AssociationOrder(db.Model):
+    order_id = db.Column(db.Integer, db.ForeignKey('order.id'), primary_key=True)
+    item_id = db.Column(db.Integer, db.ForeignKey('item.id'), primary_key=True)
+    amount = db.Column(db.Integer)
+
     item = db.relationship('Item')
 
 
