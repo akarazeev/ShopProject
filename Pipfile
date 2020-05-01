@@ -13,6 +13,7 @@ flask-login = "*"
 flask-sqlalchemy = "*"
 flask-migrate = "*"
 flask-restful = "*"
+flask-httpauth = "*"
 
 [requires]
 python_version = "3.8"

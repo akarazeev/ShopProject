@@ -1,5 +1,22 @@
 ## Примеры запросов
 
+### Аутентификация
+- username:password
+```bash
+curl -u test:test -i localhost:5000/api/v1/all_items
+```
+- token:unused_password
+```bash
+curl -u WpqKaw2J0gHNKdhyRXsVQ5QjiOtB1zTM:unused -i localhost:5000/api/v1/all_items 
+```
+
+### Регистрация
+```bash
+curl -i -H "Content-Type: application/json" -X POST -d '{"username": "test", "password": "test", "birth_date": "test", "register_date": "test", "email": "test", "phone_number": "test"}' localhost:5000/api/v1/register
+```
+
+---
+
 Создание нового товара:
 ```bash
 curl -i -H "Content-Type: application/json" -X POST -d '{"title": "cd"}' http://localhost:5000/api/v1/new_item

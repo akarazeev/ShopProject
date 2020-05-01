@@ -6,14 +6,6 @@ from datetime import datetime, timedelta
 import os
 
 
-class Association(db.Model):
-    item_id = db.Column(db.Integer, db.ForeignKey('item.id'), primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), primary_key=True)
-    amount = db.Column(db.Integer)
-    item = db.relationship('Item')
-
-
-# {"username": "Nikita", "password: "test"}
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(64), index=True, unique=True)
@@ -62,5 +54,12 @@ class Item(db.Model):
     title = db.Column(db.String(32))
     description = db.Column(db.Text)
     date_added = db.Column(db.String(15))
+
+
+class Association(db.Model):
+    item_id = db.Column(db.Integer, db.ForeignKey('item.id'), primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), primary_key=True)
+    amount = db.Column(db.Integer)
+    item = db.relationship('Item')
 
 
