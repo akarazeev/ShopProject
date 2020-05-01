@@ -1,10 +1,8 @@
-from flask import render_template, abort, jsonify, g, request
-from flask_login import current_user
+from flask import abort, jsonify, g, request
 from flask_httpauth import HTTPBasicAuth
 
-import datetime
-
-from app.models import User, Item, Association
+from app.models import User, Item, Association, Order, AssociationOrder
+from app.utils import today, get_item_json, get_index_of_item
 from app import app, db
 
 auth = HTTPBasicAuth()
@@ -26,20 +24,6 @@ def verify_password(username_or_token, password):
 #########
 #  API  #
 #########
-
-# TODO: Remove?
-# @app.route('/api/v1/login', methods=['POST'])
-# def api_login():
-#     data = request.json
-#     if not data:
-#         abort(400)
-#     user = User.query.filter_by(username=data['username']).first()
-#     if user is None or not user.check_password(data['password']):
-#         return jsonify({'error': 'wrong username or/and password'}), 400
-#
-#     login_user(user)
-#
-#     return jsonify(message='successful login', token=user.get_token()), 200
 
 @app.route('/api/v1/register', methods=['POST'])
 def api_register():
@@ -65,15 +49,15 @@ def api_register():
     if exists_(data['username'], data['email']):
         return jsonify({'error': 'user already exist'}), 400
 
-    cur_user = User(
+    new_user = User(
         username=data['username'],
         birth_date=data['birth_date'],
         register_date=data['register_date'],
         email=data['email'],
         phone_number=data['phone_number']
     )
-    cur_user.set_password(data['password'])
-    db.session.add(cur_user)
+    new_user.set_password(data['password'])
+    db.session.add(new_user)
     db.session.commit()
     return jsonify(message='user added successfully'), 200
 
@@ -82,7 +66,7 @@ def api_register():
 @auth.login_required
 def get_auth_token():
     token = g.user.get_token()
-    return jsonify({'token': token})
+    return jsonify(token=token)
 
 
 @app.route('/api/v1/new_item', methods=['POST'])
@@ -111,18 +95,6 @@ def api_new_item():
     db.session.commit()
 
     return jsonify(task=get_item_json(item)), 201
-
-
-def today():
-    return str(datetime.datetime.now().date())
-
-
-def get_item_json(item):
-    return {'id': item.id,
-            'title': item.title,
-            'description': item.description,
-            'date_added': item.date_added,
-            'category': item.category}
 
 
 @app.route('/api/v1/update_item/<int:item_id>', methods=['PUT'])
@@ -187,54 +159,114 @@ def api_add_cart():
     Add item to cart.
     :return:
     """
-    req_json = request.json
-    if not req_json:
+    data = request.json
+    if not data:
         abort(400)
 
-    for p in ['user_id', 'item_id', 'amount']:
-        if p not in req_json:
+    for p in ['item_id', 'amount']:
+        if p not in data:
             abort(400)
 
-    item = Item.query.filter_by(id=req_json['item_id']).first()
+    item = Item.query.filter_by(id=data['item_id']).first()
     if item is None:
         abort(400)
 
-    user = User.query.filter_by(id=req_json['user_id']).first()
+    user = g.user
     if user is None:
         abort(400)
 
     idx = get_index_of_item(user, item.id)
-    amount = int(req_json['amount'])
-    print(idx)
+    amount = int(data['amount'])
+    new_amount = amount
     if idx == -1:
         a = Association(amount=amount)
         a.item = item
         user.cart.append(a)
     else:
         user.cart[idx].amount += amount
+        new_amount = user.cart[idx].amount
 
     db.session.add(user)
     db.session.commit()
 
+    # TODO: Может так лучше?
     record = {
-        'user_id': req_json['user_id'],
-        'item_id': req_json['item_id'],
-        'amount': req_json['amount']
+        'user_id': user.id,
+        'item_id': data['item_id'],
+        'amount': new_amount
     }
+    # record = {
+    #     'user_id': user.id,
+    #     'item_id': data['item_id'],
+    #     'amount': data['amount']
+    # }
     return jsonify(record=record), 201
 
 
-def get_index_of_item(user, item_id):
-    cart = user.cart
-    for i in range(len(cart)):
-        if cart[i].item.id == item_id:
-            return i
-    return -1
+# TODO: Needs to be fixed ;)
+@app.route('/api/v1/remove_cart', methods=['POST'])
+@auth.login_required
+def api_remove_cart():
+    """
+    Decrease item's amount in cart by one.
+    :return:
+    """
+    data = request.json
+    if not data:
+        abort(400)
+
+    for p in ['item_id']:
+        if p not in data:
+            abort(400)
+
+    item = Item.query.filter_by(id=data['item_id']).first()
+    if item is None:
+        abort(400)
+
+    user = g.user
+    if user is None:
+        abort(400)
+
+    idx = get_index_of_item(user, item.id)
+    if idx != -1:
+        if user.cart[idx].amount > 1:
+            user.cart[idx].amount -= 1
+        # else:
+        # TODO: Remove item completely from cart
+
+        db.session.add(user)
+        db.session.commit()
+
+        record = {
+            'user_id': user.id,
+            'item_id': data['item_id'],
+            'amount': data['amount']
+        }
+        return jsonify(record=record), 201
+    else:
+        return jsonify(text="no such item in cart"), 400
+
+
+@app.route('/api/v1/cart', methods=['GET'])
+@auth.login_required
+def api_cart():
+    """
+    List all items in the cart of the user.
+    :return:
+    """
+    # data = request.json
+    user = g.user
+    if user is None:
+        abort(404)
+    cart = [{'item': get_item_json(item.item), 'amount': item.amount} for item in user.cart]
+
+    res = jsonify(cart=cart)
+    return res
 
 
 @app.route('/api/v1/cart/<int:user_id>', methods=['GET'])
 @auth.login_required
-def api_cart(user_id):
+def api_cart_userid(user_id):
     """
     List all items in the cart of user with id `user_id`.
     :return:
@@ -248,48 +280,32 @@ def api_cart(user_id):
     return res
 
 
-#####################
-#  Other Endpoints  #
-#####################
+@app.route('/api/v1/confirm_cart', methods=['POST'])
+@auth.login_required
+def api_confirm_order():
+    """
+    Confirm the order with items in cart and clear the cart.
+    :return:
+    """
+    user = g.user
+    if user is None:
+        abort(404)
+    cart = [{'item': get_item_json(item.item), 'amount': item.amount} for item in user.cart]
 
-@app.route('/')
-@app.route('/index')
-def index():
+    # TODO: Needs to be fixed ;)
+    order = Order(user_id=user, finished=0, checkout_date=today())
+    # db.session.add(order)
+    # db.session.commit()
 
-    username = current_user.username
+    # TODO: Needs to be fixed too ;)
+    cart_items = [
+        {'item_id': get_item_json(item.item)['id'], 'amount': item.amount} for item in user.cart
+    ]
+    for item in cart_items:
+        association_order = AssociationOrder(item_id=item['item_id'], amount=item['amount'], order_id=order.id)
+        # db.session.add(association_order)
+        # db.session.commit()
 
-    # if is_admin:
-    #     actions = [
-    #         {
-    #             'title': "new_item",
-    #             'text': 'Добавить новый товар в ассортимент'
-    #         }
-    #     ]
-    # else:
-    #     actions = [
-    #         {
-    #             'title': "view_cart",
-    #             'text': 'Просмотр корзины'
-    #         },
-    #         {
-    #             'title': "add_cart",
-    #             'text': 'Добавить товар в корзину'
-    #         }
-    #     ]
-    # return render_template('index.html', title='Дашборд', user=username, actions=actions)
-    return render_template('index.html', title='Дашборд', user=username)
+    # TODO: Clear the cart!
 
-
-# @app.route('/new_item')
-# def new_item():
-#     return render_template('new_item.html', title='Добавление нового товара', user=user)
-#
-#
-# @app.route('/add_cart')
-# def add_cart():
-#     return render_template('add_cart.html', title='Добавить товар в корзину', user=user)
-#
-#
-# @app.route('/view_cart')
-# def view_cart():
-#     return render_template('view_cart.html', title='Корзина', user=user)
+    return jsonify(text="order confirmed"), 201
