@@ -175,6 +175,18 @@ def api_register():
     return jsonify(message='user added successfully'), 200
 
 
+@app.route('/api/v1/login', methods=['POST'])
+def api_login():
+    data = request.json
+    if not data:
+        abort(400)
+    user = User.query.filter_by(username=data['username']).first()
+    if user is None or not user.check_password(data['password']):
+        return jsonify({'error': 'wrong username or/and password'}), 400
+    # login_user(user, remember=form.remember_me.data)
+    return jsonify(message='successful login', token=user.get_token()), 200
+
+
 @app.route('/api/v1/get_item/<int:item_id>', methods=['GET'])
 def api_get_item(item_id):
     """
