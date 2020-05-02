@@ -316,10 +316,9 @@ def api_orders_orderid(order_id):
     elif user.id != order.user_id:
         return jsonify(text="access denied"), 400
     else:
-        order = Order.query.filter_by(id=order_id).first()
-        order_items = [{'item': get_item_json(item.item), 'amount': item.amount} for item in order.items]
-
-        return jsonify(order_items=order_items), 201
+        items = [{'item': get_item_json(item.item), 'amount': item.amount} for item in order.items]
+        res = dict(items=items, finished=order.finished, checkout_date=order.checkout_date)
+        return jsonify(order=res), 201
 
 
 @app.route('/api/v1/confirm_cart', methods=['POST'])
