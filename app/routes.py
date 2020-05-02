@@ -189,17 +189,12 @@ def api_add_cart():
     db.session.add(user)
     db.session.commit()
 
-    # TODO: Может так лучше?
     record = {
         'user_id': user.id,
         'item_id': data['item_id'],
         'amount': new_amount
     }
-    # record = {
-    #     'user_id': user.id,
-    #     'item_id': data['item_id'],
-    #     'amount': data['amount']
-    # }
+
     return jsonify(record=record), 201
 
 
@@ -219,6 +214,10 @@ def api_remove_cart():
         if p not in data:
             abort(400)
 
+    removing_items = 1
+    if 'amount' in data:
+        removing_items = int(data['amount'])
+
     item = Item.query.filter_by(id=data['item_id']).first()
     if item is None:
         abort(400)
@@ -229,10 +228,14 @@ def api_remove_cart():
 
     idx = get_index_of_item(user, item.id)
     if idx != -1:
-        if user.cart[idx].amount > 1:
-            user.cart[idx].amount -= 1
-        # else:
-        # TODO: Remove item completely from cart
+        if user.cart[idx].amount > removing_items:
+            user.cart[idx].amount -= removing_items
+        elif user.cart[idx].amount < removing_items:
+            return jsonify(text="incorrect amount of removing items"), 400
+        else:
+            db.session.delete(user.cart[idx])
+            db.session.commit()
+            return jsonify(text="removed from cart"), 201
 
         db.session.add(user)
         db.session.commit()
@@ -240,7 +243,7 @@ def api_remove_cart():
         record = {
             'user_id': user.id,
             'item_id': data['item_id'],
-            'amount': data['amount']
+            'amount': user.cart[idx].amount
         }
         return jsonify(record=record), 201
     else:
