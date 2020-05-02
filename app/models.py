@@ -10,6 +10,7 @@ from app import db
 
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)  # id пользователя
+    is_admin = db.Column(db.Integer)  # Админ/не админ
     username = db.Column(db.String(64), index=True, unique=True)  # Имя пользователя
     email = db.Column(db.String(120), index=True, unique=True)  # Почта
     birth_date = db.Column(db.String(15))  # Дата рождения

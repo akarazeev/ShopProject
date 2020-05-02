@@ -54,7 +54,8 @@ def api_register():
         birth_date=data['birth_date'],
         register_date=data['register_date'],
         email=data['email'],
-        phone_number=data['phone_number']
+        phone_number=data['phone_number'],
+        is_admin=0
     )
     new_user.set_password(data['password'])
     db.session.add(new_user)
@@ -76,8 +77,10 @@ def api_new_item():
     Create new item in the store.
     :return:
     """
-    req_json = request.json
+    if g.user.is_admin == 0:
+        return jsonify(text="access denied"), 400
 
+    req_json = request.json
     if not req_json:
         abort(400)
 
@@ -100,6 +103,54 @@ def api_new_item():
     db.session.commit()
 
     return jsonify(task=get_item_json(item)), 201
+
+
+@app.route('/api/v1/set_admin', methods=['POST'])
+@auth.login_required
+def api_set_admin():
+    """
+    :return:
+    """
+    if g.user.is_admin == 0:
+        return jsonify(text="access_denied"), 400
+
+    data = request.json
+    if not data or 'username' not in data:
+        abort(400)
+
+    user = User.query.filter_by(username=data['username']).first()
+    if user is None:
+        abort(404)
+
+    user.is_admin = 1
+    db.session.add(user)
+    db.session.commit()
+
+    return jsonify(text="success"), 201
+
+
+@app.route('/api/v1/unset_admin', methods=['POST'])
+@auth.login_required
+def api_unset_admin():
+    """
+    :return:
+    """
+    if g.user.is_admin == 0:
+        return jsonify(text="access_denied"), 400
+
+    data = request.json
+    if not data or 'username' not in data or data['username'] == g.user.username:
+        abort(400)
+
+    user = User.query.filter_by(username=data['username']).first()
+    if user is None:
+        abort(404)
+
+    user.is_admin = 0
+    db.session.add(user)
+    db.session.commit()
+
+    return jsonify(text="success"), 201
 
 
 @app.route('/api/v1/update_item/<int:item_id>', methods=['PUT'])
@@ -139,6 +190,9 @@ def api_all_items():
     List all items in the store.
     :return:
     """
+    if g.user.is_admin == 0:
+        return jsonify(text="access denied"), 400
+
     items = [get_item_json(item) for item in Item.query.all()]
     res = jsonify(items=items)
     return res
@@ -264,22 +318,6 @@ def api_cart():
     """
     # data = request.json
     user = g.user
-    if user is None:
-        abort(404)
-    cart = [{'item': get_item_json(item.item), 'amount': item.amount} for item in user.cart]
-
-    res = jsonify(cart=cart)
-    return res
-
-
-@app.route('/api/v1/cart/<int:user_id>', methods=['GET'])
-@auth.login_required
-def api_cart_userid(user_id):
-    """
-    List all items in the cart of user with id `user_id`.
-    :return:
-    """
-    user = User.query.filter_by(id=user_id).first()
     if user is None:
         abort(404)
     cart = [{'item': get_item_json(item.item), 'amount': item.amount} for item in user.cart]
