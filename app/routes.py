@@ -266,6 +266,23 @@ def api_cart():
     return res
 
 
+@app.route('/api/v1/orders', methods=['GET'])
+@auth.login_required
+def api_orders():
+    """
+    List all orders of the user.
+    :return:
+    """
+    # data = request.json
+    user = g.user
+    if user is None:
+        abort(404)
+    orders = [{'order': order.id} for order in user.orders]
+
+    res = jsonify(orders=orders)
+    return res
+
+
 @app.route('/api/v1/cart/<int:user_id>', methods=['GET'])
 @auth.login_required
 def api_cart_userid(user_id):
