@@ -19,7 +19,8 @@ class User(UserMixin, db.Model):
     token = db.Column(db.String(32), index=True, unique=True)  # Токен
     token_expiration = db.Column(db.DateTime)  # Дата инвалидации токена
 
-    cart = db.relationship('Association')
+    cart = db.relationship('Association')  # Корзина пользователя
+    orders = db.relationship('Order', backref='user', lazy=True)  # Список заказов
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -74,6 +75,7 @@ class Order(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))  # id пользователя
     checkout_date = db.Column(db.String(15))  # Дата заказа
     finished = db.Column(db.Integer)  # True or False
+    items = db.relationship('AssociationOrder')  # Предметы, входящие в заказ
 
 
 class AssociationOrder(db.Model):
@@ -82,5 +84,4 @@ class AssociationOrder(db.Model):
     amount = db.Column(db.Integer)  # Количество заказанного товара
 
     item = db.relationship('Item')
-
 

@@ -198,7 +198,6 @@ def api_add_cart():
     return jsonify(record=record), 201
 
 
-# TODO: Needs to be fixed ;)
 @app.route('/api/v1/remove_cart', methods=['POST'])
 @auth.login_required
 def api_remove_cart():
@@ -293,22 +292,24 @@ def api_confirm_order():
     user = g.user
     if user is None:
         abort(404)
-    cart = [{'item': get_item_json(item.item), 'amount': item.amount} for item in user.cart]
 
-    # TODO: Needs to be fixed ;)
-    order = Order(user_id=user, finished=0, checkout_date=today())
-    # db.session.add(order)
-    # db.session.commit()
+    # create the order
+    order = Order(user_id=user.id, finished=0, checkout_date=today())
+    for elem in user.cart:
+        association_order = AssociationOrder(amount=elem.amount)
+        association_order.item = elem.item
+        order.items.append(association_order)
+    db.session.add(order)
+    db.session.commit()
 
-    # TODO: Needs to be fixed too ;)
-    cart_items = [
-        {'item_id': get_item_json(item.item)['id'], 'amount': item.amount} for item in user.cart
-    ]
-    for item in cart_items:
-        association_order = AssociationOrder(item_id=item['item_id'], amount=item['amount'], order_id=order.id)
-        # db.session.add(association_order)
-        # db.session.commit()
-
-    # TODO: Clear the cart!
+    # Clear the cart
+    clear_cart(user)
 
     return jsonify(text="order confirmed"), 201
+
+
+def clear_cart(user):
+    for elem in user.cart:
+        db.session.delete(elem)
+    db.session.commit()
+
