@@ -86,10 +86,15 @@ def api_new_item():
     if ('category' not in req_json) or type(req_json['category']) != str:
         abort(400)
 
+    available = 0
+    if 'amount' in req_json:
+        available = int(req_json['amount'])
+
     item = Item(title=req_json['title'],
                 description=req_json.get('description', ""),
                 date_added=today(),
-                category=req_json['category'])
+                category=req_json['category'],
+                available=available)
 
     db.session.add(item)
     db.session.commit()
@@ -119,6 +124,7 @@ def api_update_item(item_id):
 
     item.title = req_json.get('title', item.title)
     item.description = req_json.get('description', item.description)
+    item.available = req_json.get('amount', item.available)
 
     db.session.add(item)
     db.session.commit()
@@ -345,6 +351,35 @@ def api_confirm_order():
     clear_cart(user)
 
     return jsonify(text="order confirmed"), 201
+
+
+@app.route('/api/v1/categories', methods=['GET'])
+def api_all_categories():
+    """
+    List all categories of the store items.
+    :return:
+    """
+    query = db.session.query(Item.category.distinct().label('category'))
+    categories = [row.category for row in query.all()]
+
+    res = jsonify(categories=categories)
+    return res, 201
+
+
+@app.route('/api/v1/search', methods=['GET'])
+def api_filter_items_by_category():
+    """
+    List all items of pointed category.
+    :return:
+    """
+    data = request.json
+    if not data or 'category' not in data:
+        abort(400)
+
+    category = data['category']
+    items = Item.query.filter_by(category=category).all()
+    items = [{'item': get_item_json(item), 'amount': item.available} for item in items]
+    return jsonify(items=items), 201
 
 
 def clear_cart(user):
