@@ -266,6 +266,22 @@ def api_cart():
     return res
 
 
+@app.route('/api/v1/cart/<int:user_id>', methods=['GET'])
+@auth.login_required
+def api_cart_userid(user_id):
+    """
+    List all items in the cart of user with id `user_id`.
+    :return:
+    """
+    user = User.query.filter_by(id=user_id).first()
+    if user is None:
+        abort(404)
+    cart = [{'item': get_item_json(item.item), 'amount': item.amount} for item in user.cart]
+
+    res = jsonify(cart=cart)
+    return res
+
+
 @app.route('/api/v1/orders', methods=['GET'])
 @auth.login_required
 def api_orders():
@@ -283,20 +299,27 @@ def api_orders():
     return res
 
 
-@app.route('/api/v1/cart/<int:user_id>', methods=['GET'])
+@app.route('/api/v1/order/<int:order_id>', methods=['GET'])
 @auth.login_required
-def api_cart_userid(user_id):
+def api_orders_orderid(order_id):
     """
-    List all items in the cart of user with id `user_id`.
+    List all items in the order with id `order_id`.
     :return:
     """
-    user = User.query.filter_by(id=user_id).first()
+    user = g.user
     if user is None:
         abort(404)
-    cart = [{'item': get_item_json(item.item), 'amount': item.amount} for item in user.cart]
 
-    res = jsonify(cart=cart)
-    return res
+    order = Order.query.filter_by(id=order_id).first()
+    if order is None:
+        return jsonify(text="no such order"), 400
+    elif user.id != order.user_id:
+        return jsonify(text="access denied"), 400
+    else:
+        order = Order.query.filter_by(id=order_id).first()
+        order_items = [{'item': get_item_json(item.item), 'amount': item.amount} for item in order.items]
+
+        return jsonify(order_items=order_items), 201
 
 
 @app.route('/api/v1/confirm_cart', methods=['POST'])
