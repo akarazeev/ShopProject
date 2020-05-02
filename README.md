@@ -15,6 +15,12 @@ curl -u WpqKaw2J0gHNKdhyRXsVQ5QjiOtB1zTM:unused -i localhost:5000/api/v1/all_ite
 curl -i -H "Content-Type: application/json" -X POST -d '{"username": "test", "password": "test", "birth_date": "test", "register_date": "test", "email": "test", "phone_number": "test"}' localhost:5000/api/v1/register
 ```
 
+### Админ/Не админ
+```bash
+curl -u test:test -i -H "Content-Type: application/json" -X POST -d '{"username": "test2"}' localhost:5000/api/v1/set_admin
+```
+
+
 ---
 
 Создание нового товара:
