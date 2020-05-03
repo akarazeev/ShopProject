@@ -381,6 +381,8 @@ def api_confirm_order():
         association_order = AssociationOrder(amount=elem.amount)
         association_order.item = elem.item
         order.items.append(association_order)
+        if elem.amount > elem.item.available:
+            return jsonify(text="not enough items in the store"), 400
     db.session.add(order)
     db.session.commit()
 
