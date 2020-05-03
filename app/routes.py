@@ -63,7 +63,7 @@ def api_register():
     return jsonify(message='user added successfully'), 200
 
 
-@app.route('/api/v1/token')
+@app.route('/api/v1/token', methods=['GET'])
 @auth.login_required
 def get_auth_token():
     token = g.user.get_token()
