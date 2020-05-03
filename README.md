@@ -56,7 +56,7 @@ curl -u WpqKaw2J0gHNKdhyRXsVQ5QjiOtB1zTM:unused -i http://d07d7b94.ngrok.io/api/
 * `POST`
 * Login: `1`, Admin: `1`
 * Добавление нового товара в магазин
-* Пример: `curl -u test:test -i -H "Content-Type: application/json" -X POST -d '{"title": "cd"}' http://d07d7b94.ngrok.io/api/v1/new_item`
+* Пример: `curl -u test:test -i -H "Content-Type: application/json" -X POST -d '{"title": "Water bottle", "category": "Bottles"}' http://d07d7b94.ngrok.io/api/v1/new_item`
 
 ### `/set_admin`
 * `POST`
