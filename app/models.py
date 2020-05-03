@@ -61,6 +61,7 @@ class Item(db.Model):
     category = db.Column(db.String(32), index=True)  # Категория
     description = db.Column(db.Text)  # Описание
     date_added = db.Column(db.String(15))  # Дата добавления
+    commentaries = db.relationship('Commentary', backref='item', lazy=True)  # Список комментариев к товару
 
 
 class Association(db.Model):
@@ -86,3 +87,10 @@ class AssociationOrder(db.Model):
 
     item = db.relationship('Item')
 
+
+class Commentary(db.Model):
+    id = db.Column(db.Integer, primary_key=True)  # id комментария
+    item_id = db.Column(db.Integer, db.ForeignKey('item.id'))  # id комментируемого товара
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))  # id автора комментария
+    creation_date = db.Column(db.String(15))  # Дата создания комментария
+    text = db.Column(db.Text)  # Текст комментария

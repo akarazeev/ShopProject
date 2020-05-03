@@ -1,8 +1,8 @@
 from flask import abort, jsonify, g, request
 from flask_httpauth import HTTPBasicAuth
 
-from app.models import User, Item, Association, Order, AssociationOrder
-from app.utils import today, get_item_json, get_index_of_item
+from app.models import User, Item, Association, Order, AssociationOrder, Commentary
+from app.utils import today, get_item_json, get_index_of_item, get_commentary_json
 from app import app, db
 
 auth = HTTPBasicAuth()
@@ -418,6 +418,83 @@ def api_filter_items_by_category():
     items = Item.query.filter_by(category=category).all()
     items = [{'item': get_item_json(item), 'amount': item.available} for item in items]
     return jsonify(items=items), 201
+
+
+@app.route('/api/v1/items/<int:item_id>/add_commentary', methods=['POST'])
+@auth.login_required
+def api_add_commentary(item_id):
+    """
+    Add commentary to the item with id=item_id
+    :return:
+    """
+    user = g.user
+    if user is None:
+        abort(404)
+
+    item = Item.query.filter_by(id=item_id).first()
+    if item is None:
+        abort(400)
+
+    data = request.json
+    if not data or 'text' not in data:
+        abort(400)
+
+    commentary = Commentary(user_id=user.id,
+                            item_id=item_id,
+                            creation_date=data.get('creation_date', today()),
+                            text=data['text'])
+    db.session.add(commentary)
+    db.session.commit()
+
+    return jsonify(text="commentary added successfully"), 201
+
+
+@app.route('/api/v1/items/<int:item_id>/remove_commentary', methods=['POST'])
+@auth.login_required
+def api_remove_commentary(item_id):
+    """
+    Remove commentary from the item with id=item_id
+    :return:
+    """
+    user = g.user
+    if user is None:
+        abort(404)
+
+    item = Item.query.filter_by(id=item_id).first()
+    if item is None:
+        abort(400)
+
+    data = request.json
+    if not data or 'commentary_id' not in data:
+        abort(400)
+
+    commentary = Commentary.query.filter_by(id=data['commentary_id']).first()
+    if commentary is None:
+        return jsonify(text="no such commentary"), 400
+    elif commentary.item_id != item_id:
+        return jsonify(text="this commentary from other item"), 400
+    elif user.id != commentary.user_id and user.is_admin != 1:
+        return jsonify(text="access denied"), 400
+
+    db.session.delete(commentary)
+    db.session.commit()
+
+    return jsonify(text="commentary removed successfully"), 201
+
+
+@app.route('/api/v1/items/<int:item_id>/commentaries', methods=['GET'])
+def api_get_commentaries(item_id):
+    """
+    List of all commentaries for item with id=item_id.
+    :return:
+    """
+
+    item = Item.query.filter_by(id=item_id).first()
+    if item is None:
+        abort(400)
+
+    commentaries = [get_commentary_json(commentary) for commentary in item.commentaries]
+    return jsonify(commentaries=commentaries), 201
 
 
 def clear_cart(user):
