@@ -199,7 +199,6 @@ def api_all_items():
 
 
 @app.route('/api/v1/get_item/<int:item_id>', methods=['GET'])
-@auth.login_required
 def api_get_item(item_id):
     """
     Returns information related to item with id `item_id`.

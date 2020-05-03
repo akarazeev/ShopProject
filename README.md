@@ -21,7 +21,7 @@ Prefix: `/api/v1`
 | `GET`  |  `/order/<int:order_id>`                  | `1`            | `0`            | Список всех товаров в оформленном заказе                 |
 | `POST` |  `/confirm_cart`                          | `1`            | `0`            | Оформить заказ с товарами в корзине                      |
 | `GET`  |  `/categories`                            | `0`            | `0`            | Список всех имеющихся категорий в магазине               |
-| `GET`  |  `/search`                                | `0`            | `0`            | Поиск по категории                                       |
+| `GET`  |  `/search`                                | `0`            | `0`            | Список всех товаров в данной категории                   |
 | `POST` |  `/items/<int:item_id>/add_commentary`    | `1`            | `0`            | Добавление комментария к товару                          |
 | `POST` |  `/items/<int:item_id>/remove_commentary` | `1`            | `0`            | Удаление комментария к товару                            |
 | `GET`  |  `/items/<int:item_id>/commentaries`      | `0`            | `0`            | Список всех комментариев к товару                        |
@@ -50,7 +50,7 @@ curl -u WpqKaw2J0gHNKdhyRXsVQ5QjiOtB1zTM:unused -i http://d07d7b94.ngrok.io/api/
 * `GET`
 * Login: `1`, Admin: `0`
 * Запрос токена
-* Пример:
+* Пример: `curl -u test:test -i http://d07d7b94.ngrok.io/api/v1/token`
 
 ### `/new_item`
 * `POST`
@@ -133,7 +133,7 @@ curl -u WpqKaw2J0gHNKdhyRXsVQ5QjiOtB1zTM:unused -i http://d07d7b94.ngrok.io/api/
 ### `/search`                   
 * `GET`
 * Login: `0`, Admin: `0`
-* Поиск по категории
+* Список всех товаров в данной категории
 * Пример: `curl -u test:test -i -H "Content-Type: application/json" -X GET -d '{"category": "laptops"}' http://d07d7b94.ngrok.io/api/v1/search`
 
 ### `/items/<int:item_id>/add_commentary`                   
