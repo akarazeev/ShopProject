@@ -58,6 +58,7 @@ curl -u WpqKaw2J0gHNKdhyRXsVQ5QjiOtB1zTM:unused -i http://d07d7b94.ngrok.io/api/
 * Login: `1`, Admin: `0`
 * Запрос токена
 * Параметры запроса: нет
+* Результат при успешном выполнении: json с параметром token
 * Пример: `curl -u test:test -i http://d07d7b94.ngrok.io/api/v1/token`
 
 ### `/new_item`
@@ -69,6 +70,7 @@ curl -u WpqKaw2J0gHNKdhyRXsVQ5QjiOtB1zTM:unused -i http://d07d7b94.ngrok.io/api/
     2. category - категория нового товара
     3. description? - описание нового товара (если не указано, то description="")
     4. amount? - доступное количество товара (если не указано, то amount=0)
+* Результат при успешном выполнении: json с параметром task, где task - описание товара
 * Пример: `curl -u test:test -i -H "Content-Type: application/json" -X POST -d '{"title": "Water bottle", "category": "Bottles"}' http://d07d7b94.ngrok.io/api/v1/new_item`
 
 ### `/set_admin`
@@ -95,6 +97,7 @@ curl -u WpqKaw2J0gHNKdhyRXsVQ5QjiOtB1zTM:unused -i http://d07d7b94.ngrok.io/api/
     1. title? - новый заголовок для товара
     2. description? - новое описание для товара
     3. amount? - новое количество для товара
+* Результат при успешном выполнении: json с параметром task, где task - новое описание товара
 * Пример: `curl -u test:test -i -H "Content-Type: application/json" -X PUT -d '{"description":"new description"}' http://d07d7b94.ngrok.io/api/v1/update_item/0`
 
 ### `/all_items`                
@@ -102,6 +105,7 @@ curl -u WpqKaw2J0gHNKdhyRXsVQ5QjiOtB1zTM:unused -i http://d07d7b94.ngrok.io/api/
 * Login: `1`, Admin: `1`
 * Список всех товаров магазина
 * Параметры запроса: нет
+* Результат при успешном выполнении: json с параметром items, где items - массив с описанием товаров
 * Пример: `curl -u test:test -i http://d07d7b94.ngrok.io/api/v1/all_items`
 
 ### `/get_item/<int:item_id>`   
@@ -109,6 +113,7 @@ curl -u WpqKaw2J0gHNKdhyRXsVQ5QjiOtB1zTM:unused -i http://d07d7b94.ngrok.io/api/
 * Login: `0`, Admin: `0`
 * Запрос параметров товара с id=item_id
 * Параметры запроса: нет
+* Результат при успешном выполнении: json с описанием товара
 * Пример: `curl -u test:test -i http://d07d7b94.ngrok.io/api/v1/get_item/0`
 
 ### `/add_cart`                 
@@ -118,6 +123,10 @@ curl -u WpqKaw2J0gHNKdhyRXsVQ5QjiOtB1zTM:unused -i http://d07d7b94.ngrok.io/api/
 * Параметры запроса:
     1. item_id - id товара, который надо добавить
     2. amount - количества единиц товара, которые надо добавить в корзину
+* Результат при успешном выполнении: json с параметром record, где record имеет следующие параметры:
+    1. user_id - id пользователя
+    2. item_id - id товара
+    3. amount - новое количество товара
 * Пример: `curl -u test:test -i -H "Content-Type: application/json" -X POST -d '{"amount": "1", "item_id": "2"}' http://d07d7b94.ngrok.io/api/v1/add_cart`
 
 ### `/remove_cart`              
@@ -127,6 +136,10 @@ curl -u WpqKaw2J0gHNKdhyRXsVQ5QjiOtB1zTM:unused -i http://d07d7b94.ngrok.io/api/
 * Параметры запроса:
     1. item_id - id товара, который надо удалить
     2. amount? - количества единиц товара, который надо удалить из корзины (если параметр не указан, то amount=1)
+* Результат при успешном выполнении: json с параметром record, где record имеет следующие параметры:
+    1. user_id - id пользователя
+    2. item_id - id товара
+    3. amount - новое количество товара
 * Пример: `curl -u test:test -i -H "Content-Type: application/json" -X POST -d '{"amount": "1", "item_id": "2"}' http://d07d7b94.ngrok.io/api/v1/remove_cart`
 
 ### `/cart`                     
@@ -134,6 +147,7 @@ curl -u WpqKaw2J0gHNKdhyRXsVQ5QjiOtB1zTM:unused -i http://d07d7b94.ngrok.io/api/
 * Login: `1`, Admin: `0`
 * Список всех товаров в корзине
 * Параметры запроса: нет
+* Результат при успешном выполнении: массив из объектов с двумя полями: item (описание товара) и amount (количество товара в корзине)
 * Пример: `curl -u test:test -i http://d07d7b94.ngrok.io/api/v1/cart`
 
 ### `/orders`                   
@@ -141,6 +155,7 @@ curl -u WpqKaw2J0gHNKdhyRXsVQ5QjiOtB1zTM:unused -i http://d07d7b94.ngrok.io/api/
 * Login: `1`, Admin: `0`
 * Список оформленных заказов
 * Параметры запроса: нет
+* Результат при успешном выполнении: json с массивом id заказов
 * Пример: `curl -u test:test -i http://d07d7b94.ngrok.io/api/v1/orders`
 
 ### `/order/<int:order_id>`     
@@ -148,6 +163,10 @@ curl -u WpqKaw2J0gHNKdhyRXsVQ5QjiOtB1zTM:unused -i http://d07d7b94.ngrok.io/api/
 * Login: `1`, Admin: `0`
 * Список всех товаров в оформленном заказе с id=order_id
 * Параметры запроса: нет
+* Результат при успешном выполнении: json со следующими параметрами:
+    1. finished - состояние заказа
+    2. checkout_date - дата составления заказа
+    3. items - массив из объектов с двумя полями: item (описание товара) и amount (количество товара в заказе) 
 * Пример: `curl -u test:test -i http://d07d7b94.ngrok.io/api/v1/order/0`
 
 ### `/confirm_cart`             
@@ -162,6 +181,7 @@ curl -u WpqKaw2J0gHNKdhyRXsVQ5QjiOtB1zTM:unused -i http://d07d7b94.ngrok.io/api/
 * Login: `0`, Admin: `0`
 * Список всех имеющихся категорий в магазине
 * Параметры запроса: нет
+* Результат при успешном выполнении: json с массивом названий категорий
 * Пример: `curl -u test:test -i http://d07d7b94.ngrok.io/api/v1/categories`
 
 ### `/search`                   
@@ -170,6 +190,7 @@ curl -u WpqKaw2J0gHNKdhyRXsVQ5QjiOtB1zTM:unused -i http://d07d7b94.ngrok.io/api/
 * Список всех товаров в данной категории
 * Параметры запроса:
     1. category - именование категории, по которой надо сделать поиск
+* Результат при успешном выполнении: json с массивом товаров
 * Пример: `curl -u test:test -i -H "Content-Type: application/json" -X GET -d '{"category": "laptops"}' http://d07d7b94.ngrok.io/api/v1/search`
 
 ### `/items/<int:item_id>/add_commentary`                   
@@ -194,4 +215,23 @@ curl -u WpqKaw2J0gHNKdhyRXsVQ5QjiOtB1zTM:unused -i http://d07d7b94.ngrok.io/api/
 * Login: `0`, Admin: `0`
 * Список всех комментариев к товару с id=item_id
 * Параметры запроса: нет
+* Результат при успешном выполнении: json с массивом комментариев
 * Пример: `curl -u test:test -i http://d07d7b94.ngrok.io/api/v1/items/1/commentaries`
+
+
+## Описание json некоторых возвращаемых элементов
+
+### Товар
+* id - id товара
+* title - название товара
+* description - описание товара
+* date_added - дата добавления товара 
+* category - категория товара
+
+
+### Комментарий
+* id - id комментария
+* user_id - пользователь, который создал данный комментарий
+* item_id - товар, к которому написан данный комментарий
+* text - текст комментария
+* creation_date - дата создания комментария
