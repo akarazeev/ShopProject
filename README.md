@@ -1,6 +1,6 @@
 # API
 
-Address: `http://87ee3a3c.ngrok.io`
+Address: `http://localhost:5000`
 
 Prefix: `/api/v1`
 
@@ -31,11 +31,11 @@ Prefix: `/api/v1`
 В качестве аутентификации может использоваться как пара `username`:`password`, так и `token`:unused_password
 - `username`:`password`
 ```bash
-curl -u test:test -i http://87ee3a3c.ngrok.io/api/v1/all_items
+curl -u test:test -i http://localhost:5000/api/v1/all_items
 ```
 - `token`:unused_password
 ```bash
-curl -u WpqKaw2J0gHNKdhyRXsVQ5QjiOtB1zTM:unused -i http://87ee3a3c.ngrok.io/api/v1/all_items
+curl -u WpqKaw2J0gHNKdhyRXsVQ5QjiOtB1zTM:unused -i http://localhost:5000/api/v1/all_items
 ```
 
 ## Описание json некоторых возвращаемых элементов
@@ -67,7 +67,7 @@ curl -u WpqKaw2J0gHNKdhyRXsVQ5QjiOtB1zTM:unused -i http://87ee3a3c.ngrok.io/api/
     4. register_date - дата регистрации пользователя
     5. email - почта пользователя
     6. phone_number - телефон пользователя
-* Пример: `curl -i -H "Content-Type: application/json" -X POST -d '{"username": "test", "password": "test", "birth_date": "test", "register_date": "test", "email": "test", "phone_number": "test"}' http://87ee3a3c.ngrok.io/api/v1/register`
+* Пример: `curl -i -H "Content-Type: application/json" -X POST -d '{"username": "test", "password": "test", "birth_date": "test", "register_date": "test", "email": "test", "phone_number": "test"}' http://localhost:5000/api/v1/register`
 
 ### `/token`
 * `GET`
@@ -75,7 +75,7 @@ curl -u WpqKaw2J0gHNKdhyRXsVQ5QjiOtB1zTM:unused -i http://87ee3a3c.ngrok.io/api/
 * Запрос токена
 * Параметры запроса: нет
 * Результат при успешном выполнении: json с параметром token
-* Пример: `curl -u test:test -i http://87ee3a3c.ngrok.io/api/v1/token`
+* Пример: `curl -u test:test -i http://localhost:5000/api/v1/token`
 
 ### `/new_item`
 * `POST`
@@ -87,7 +87,7 @@ curl -u WpqKaw2J0gHNKdhyRXsVQ5QjiOtB1zTM:unused -i http://87ee3a3c.ngrok.io/api/
     3. description? - описание нового товара (если не указано, то description="")
     4. amount? - доступное количество товара (если не указано, то amount=0)
 * Результат при успешном выполнении: json с параметром task, где task - описание товара
-* Пример: `curl -u test:test -i -H "Content-Type: application/json" -X POST -d '{"title": "Water bottle", "category": "Bottles"}' http://87ee3a3c.ngrok.io/api/v1/new_item`
+* Пример: `curl -u test:test -i -H "Content-Type: application/json" -X POST -d '{"title": "Water bottle", "category": "Bottles"}' http://localhost:5000/api/v1/new_item`
 
 ### `/set_admin`
 * `POST`
@@ -95,7 +95,7 @@ curl -u WpqKaw2J0gHNKdhyRXsVQ5QjiOtB1zTM:unused -i http://87ee3a3c.ngrok.io/api/
 * Дать пользователю права админа
 * Параметры запроса:
     1. username - логин пользователя, которому надо дать права админа
-* Пример: `curl -u test:test -i -H "Content-Type: application/json" -X POST -d '{"username": "test2"}' http://87ee3a3c.ngrok.io/api/v1/set_admin`
+* Пример: `curl -u test:test -i -H "Content-Type: application/json" -X POST -d '{"username": "test2"}' http://localhost:5000/api/v1/set_admin`
 
 ### `/unset_admin`              
 * `POST`
@@ -103,7 +103,7 @@ curl -u WpqKaw2J0gHNKdhyRXsVQ5QjiOtB1zTM:unused -i http://87ee3a3c.ngrok.io/api/
 * Забрать у пользователя права админа
 * Параметры запроса:
     1. username - логин пользователя, у которого надо забрать права админа
-* Пример: `curl -u test:test -i -H "Content-Type: application/json" -X POST -d '{"username": "test2"}' http://87ee3a3c.ngrok.io/api/v1/unset_admin`
+* Пример: `curl -u test:test -i -H "Content-Type: application/json" -X POST -d '{"username": "test2"}' http://localhost:5000/api/v1/unset_admin`
 
 ### `/update_item/<int:item_id>`
 * `PUT`
@@ -114,7 +114,7 @@ curl -u WpqKaw2J0gHNKdhyRXsVQ5QjiOtB1zTM:unused -i http://87ee3a3c.ngrok.io/api/
     2. description? - новое описание для товара
     3. amount? - новое количество для товара
 * Результат при успешном выполнении: json с параметром task, где task - новое описание товара
-* Пример: `curl -u test:test -i -H "Content-Type: application/json" -X PUT -d '{"description":"new description"}' http://87ee3a3c.ngrok.io/api/v1/update_item/0`
+* Пример: `curl -u test:test -i -H "Content-Type: application/json" -X PUT -d '{"description":"new description"}' http://localhost:5000/api/v1/update_item/0`
 
 ### `/all_items`                
 * `GET`
@@ -122,7 +122,7 @@ curl -u WpqKaw2J0gHNKdhyRXsVQ5QjiOtB1zTM:unused -i http://87ee3a3c.ngrok.io/api/
 * Список всех товаров магазина
 * Параметры запроса: нет
 * Результат при успешном выполнении: json с параметром items, где items - массив с описанием товаров
-* Пример: `curl -u test:test -i http://87ee3a3c.ngrok.io/api/v1/all_items`
+* Пример: `curl -u test:test -i http://localhost:5000/api/v1/all_items`
 
 ### `/get_item/<int:item_id>`   
 * `GET`
@@ -130,7 +130,7 @@ curl -u WpqKaw2J0gHNKdhyRXsVQ5QjiOtB1zTM:unused -i http://87ee3a3c.ngrok.io/api/
 * Запрос параметров товара с id=item_id
 * Параметры запроса: нет
 * Результат при успешном выполнении: json с описанием товара
-* Пример: `curl -u test:test -i http://87ee3a3c.ngrok.io/api/v1/get_item/0`
+* Пример: `curl -u test:test -i http://localhost:5000/api/v1/get_item/0`
 
 ### `/add_cart`                 
 * `POST`
@@ -143,7 +143,7 @@ curl -u WpqKaw2J0gHNKdhyRXsVQ5QjiOtB1zTM:unused -i http://87ee3a3c.ngrok.io/api/
     1. user_id - id пользователя
     2. item_id - id товара
     3. amount - новое количество товара
-* Пример: `curl -u test:test -i -H "Content-Type: application/json" -X POST -d '{"amount": "1", "item_id": "2"}' http://87ee3a3c.ngrok.io/api/v1/add_cart`
+* Пример: `curl -u test:test -i -H "Content-Type: application/json" -X POST -d '{"amount": "1", "item_id": "2"}' http://localhost:5000/api/v1/add_cart`
 
 ### `/remove_cart`              
 * `POST`
@@ -156,7 +156,7 @@ curl -u WpqKaw2J0gHNKdhyRXsVQ5QjiOtB1zTM:unused -i http://87ee3a3c.ngrok.io/api/
     1. user_id - id пользователя
     2. item_id - id товара
     3. amount - новое количество товара
-* Пример: `curl -u test:test -i -H "Content-Type: application/json" -X POST -d '{"amount": "1", "item_id": "2"}' http://87ee3a3c.ngrok.io/api/v1/remove_cart`
+* Пример: `curl -u test:test -i -H "Content-Type: application/json" -X POST -d '{"amount": "1", "item_id": "2"}' http://localhost:5000/api/v1/remove_cart`
 
 ### `/cart`                     
 * `GET`
@@ -164,7 +164,7 @@ curl -u WpqKaw2J0gHNKdhyRXsVQ5QjiOtB1zTM:unused -i http://87ee3a3c.ngrok.io/api/
 * Список всех товаров в корзине
 * Параметры запроса: нет
 * Результат при успешном выполнении: массив из объектов с двумя полями: item (описание товара) и amount (количество товара в корзине)
-* Пример: `curl -u test:test -i http://87ee3a3c.ngrok.io/api/v1/cart`
+* Пример: `curl -u test:test -i http://localhost:5000/api/v1/cart`
 
 ### `/orders`                   
 * `GET`
@@ -172,7 +172,7 @@ curl -u WpqKaw2J0gHNKdhyRXsVQ5QjiOtB1zTM:unused -i http://87ee3a3c.ngrok.io/api/
 * Список оформленных заказов
 * Параметры запроса: нет
 * Результат при успешном выполнении: json с массивом id заказов
-* Пример: `curl -u test:test -i http://87ee3a3c.ngrok.io/api/v1/orders`
+* Пример: `curl -u test:test -i http://localhost:5000/api/v1/orders`
 
 ### `/order/<int:order_id>`     
 * `GET`
@@ -183,14 +183,14 @@ curl -u WpqKaw2J0gHNKdhyRXsVQ5QjiOtB1zTM:unused -i http://87ee3a3c.ngrok.io/api/
     1. finished - состояние заказа
     2. checkout_date - дата составления заказа
     3. items - массив из объектов с двумя полями: item (описание товара) и amount (количество товара в заказе)
-* Пример: `curl -u test:test -i http://87ee3a3c.ngrok.io/api/v1/order/0`
+* Пример: `curl -u test:test -i http://localhost:5000/api/v1/order/0`
 
 ### `/confirm_cart`             
 * `POST`
 * Login: `1`, Admin: `0`
 * Оформить заказ с товарами в корзине
 * Параметры запроса: нет
-* Пример: `curl -u test:test -i -X POST http://87ee3a3c.ngrok.io/api/v1/confirm_cart`
+* Пример: `curl -u test:test -i -X POST http://localhost:5000/api/v1/confirm_cart`
 
 ### `/categories`               
 * `GET`
@@ -198,7 +198,7 @@ curl -u WpqKaw2J0gHNKdhyRXsVQ5QjiOtB1zTM:unused -i http://87ee3a3c.ngrok.io/api/
 * Список всех имеющихся категорий в магазине
 * Параметры запроса: нет
 * Результат при успешном выполнении: json с массивом названий категорий
-* Пример: `curl -u test:test -i http://87ee3a3c.ngrok.io/api/v1/categories`
+* Пример: `curl -u test:test -i http://localhost:5000/api/v1/categories`
 
 ### `/search`                   
 * `GET`
@@ -207,7 +207,7 @@ curl -u WpqKaw2J0gHNKdhyRXsVQ5QjiOtB1zTM:unused -i http://87ee3a3c.ngrok.io/api/
 * Параметры запроса:
     1. category - именование категории, по которой надо сделать поиск
 * Результат при успешном выполнении: json с массивом товаров
-* Пример: `curl -u test:test -i -H "Content-Type: application/json" -X GET -d '{"category": "laptops"}' http://87ee3a3c.ngrok.io/api/v1/search`
+* Пример: `curl -u test:test -i -H "Content-Type: application/json" -X GET -d '{"category": "laptops"}' http://localhost:5000/api/v1/search`
 
 ### `/items/<int:item_id>/add_commentary`                   
 * `POST`
@@ -216,7 +216,7 @@ curl -u WpqKaw2J0gHNKdhyRXsVQ5QjiOtB1zTM:unused -i http://87ee3a3c.ngrok.io/api/
 * Параметры запроса:
     1. text - текст комментария
     2. creation_date? - дата создания комментария
-* Пример: `curl -u test:test -i -H "Content-Type: application/json" -X POST -d '{"text": "Test comment"}' http://87ee3a3c.ngrok.io/api/v1/items/1/add_commentary`
+* Пример: `curl -u test:test -i -H "Content-Type: application/json" -X POST -d '{"text": "Test comment"}' http://localhost:5000/api/v1/items/1/add_commentary`
 
 ### `/items/<int:item_id>/remove_commentary`                   
 * `POST`
@@ -224,7 +224,7 @@ curl -u WpqKaw2J0gHNKdhyRXsVQ5QjiOtB1zTM:unused -i http://87ee3a3c.ngrok.io/api/
 * Удаление комментария к товару с id=item_id
 * Параметры запроса:
     1. commentary_id - id комментария, который надо удалить
-* Пример: `curl -u test:test -i -H "Content-Type: application/json" -X POST -d '{"commentary_id": "1"}' http://87ee3a3c.ngrok.io/api/v1/items/1/remove_commentary`
+* Пример: `curl -u test:test -i -H "Content-Type: application/json" -X POST -d '{"commentary_id": "1"}' http://localhost:5000/api/v1/items/1/remove_commentary`
 
 ### `/items/<int:item_id>/commentaries`                   
 * `GET`
@@ -232,4 +232,4 @@ curl -u WpqKaw2J0gHNKdhyRXsVQ5QjiOtB1zTM:unused -i http://87ee3a3c.ngrok.io/api/
 * Список всех комментариев к товару с id=item_id
 * Параметры запроса: нет
 * Результат при успешном выполнении: json с массивом комментариев
-* Пример: `curl -u test:test -i http://87ee3a3c.ngrok.io/api/v1/items/1/commentaries`
+* Пример: `curl -u test:test -i http://localhost:5000/api/v1/items/1/commentaries`
